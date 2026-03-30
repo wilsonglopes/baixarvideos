@@ -68,6 +68,11 @@ def get_ydl_opts(job_id: str, output_format: str) -> dict:
         "no_warnings": True,
         "postprocessors": [],
         "overwrites": True,
+        # Bypass YouTube bot detection on cloud servers
+        "extractor_args": {"youtube": {"player_client": ["ios"]}},
+        "http_headers": {
+            "User-Agent": "com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X;)"
+        },
     }
 
     return opts
@@ -111,7 +116,15 @@ def get_info():
     if not url:
         return jsonify({"error": "URL vazia"}), 400
     try:
-        opts = {"quiet": True, "no_warnings": True, "skip_download": True}
+        opts = {
+            "quiet": True,
+            "no_warnings": True,
+            "skip_download": True,
+            "extractor_args": {"youtube": {"player_client": ["ios"]}},
+            "http_headers": {
+                "User-Agent": "com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X;)"
+            },
+        }
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=False)
         thumb = info.get("thumbnail", "")
