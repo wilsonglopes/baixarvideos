@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Baixador de Vídeos</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f0f13;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-bottom: 1px solid #2a2a4a;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    header .logo { font-size: 32px; }
+    header h1 { font-size: 22px; font-weight: 700; color: #fff; }
+    header p { font-size: 13px; color: #888; margin-top: 2px; }
+
+    .badges {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .badge.yt  { background: #ff0000; color: #fff; }
+    .badge.ig  { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff; }
+    .badge.fb  { background: #1877f2; color: #fff; }
+
+    main { max-width: 820px; margin: 40px auto; padding: 0 20px; }
+
+    .card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+    }
+
+    .card h2 { font-size: 16px; font-weight: 600; color: #aaa; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: #0f0f1a;
+      border: 1px solid #3a3a5a;
+      border-radius: 10px;
+      padding: 14px 18px;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    input[type="text"]:focus { border-color: #6c63ff; }
+    input[type="text"]::placeholder { color: #555; }
+
+    button {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+    }
+
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-info    { background: #3a3a5a; color: #ccc; }
+    .btn-primary { background: #6c63ff; color: #fff; }
+    .btn-primary:hover { background: #7c73ff; }
+
+    .format-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .fmt-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: #0f0f1a;
+      border: 1px solid #3a3a5a;
+      color: #aaa;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .fmt-btn.active {
+      background: #6c63ff;
+      border-color: #6c63ff;
+      color: #fff;
+    }
+
+    /* Preview */
+    #preview {
+      display: none;
+      margin-top: 24px;
+      background: #0f0f1a;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      padding: 16px;
+      display: none;
+      align-items: center;
+      gap: 16px;
+    }
+
+    #preview.visible { display: flex; }
+
+    #preview img {
+      width: 120px;
+      height: 68px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #2a2a3a;
+    }
+
+    #preview .info { flex: 1; }
+    #preview .info .title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+    #preview .info .meta  { font-size: 12px; color: #777; }
+
+    .btn-download {
+      background: #22c55e;
+      color: #fff;
+      padding: 12px 20px;
+      white-space: nowrap;
+    }
+
+    .btn-download:hover { background: #16a34a; }
+
+    /* Progress */
+    #progress-area { display: none; margin-top: 20px; }
+    #progress-area.visible { display: block; }
+
+    .progress-bar-wrap {
+      background: #0f0f1a;
+      border-radius: 99px;
+      height: 10px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6c63ff, #22c55e);
+      border-radius: 99px;
+      transition: width .4s ease;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #777;
+    }
+
+    .status-msg {
+      font-size: 13px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+
+    /* File list */
+    .file-list { list-style: none; }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #2a2a3a;
+    }
+
+    .file-item:last-child { border-bottom: none; }
+
+    .file-icon { font-size: 22px; }
+    .file-name { flex: 1; font-size: 13px; color: #ddd; word-break: break-all; }
+    .file-size { font-size: 11px; color: #666; white-space: nowrap; }
+
+    .empty-msg { text-align: center; color: #555; font-size: 14px; padding: 20px; }
+
+    .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; }
+
+    .toast {
+      background: #1e1e3a;
+      border: 1px solid #3a3a5a;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 13px;
+      color: #fff;
+      animation: slideIn .3s ease;
+    }
+
+    .toast.success { border-color: #22c55e; color: #22c55e; }
+    .toast.error   { border-color: #ef4444; color: #ef4444; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⬇️</div>
+  <div>
+    <h1>Baixador de Vídeos</h1>
+    <p>YouTube, Instagram e Facebook em um só lugar</p>
+  </div>
+  <div class="badges">
+    <span class="badge yt">YouTube</span>
+    <span class="badge ig">Instagram</span>
+    <span class="badge fb">Facebook</span>
+  </div>
+</header>
+
+<main>
+  <!-- URL Input -->
+  <div class="card">
+    <h2>Cole o link do vídeo</h2>
+
+    <div class="input-row">
+      <input type="text" id="url-input" placeholder="https://www.youtube.com/watch?v=... ou Instagram / Facebook" />
+      <button class="btn-info" onclick="fetchInfo()" id="btn-info">Buscar</button>
+    </div>
+
+    <div class="format-row">
+      <span style="font-size:12px;color:#666;align-self:center;margin-right:4px;">Formato:</span>
+      <button class="fmt-btn active" data-fmt="best"  onclick="selectFmt(this)">Melhor qualidade</button>
+      <button class="fmt-btn"        data-fmt="1080"  onclick="selectFmt(this)">1080p</button>
+      <button class="fmt-btn"        data-fmt="720"   onclick="selectFmt(this)">720p</button>
+      <button class="fmt-btn"        data-fmt="480"   onclick="selectFmt(this)">480p</button>
+      <button class="fmt-btn"        data-fmt="audio" onclick="selectFmt(this)">🎵 Só áudio (MP3)</button>
+    </div>
+
+    <!-- Preview -->
+    <div id="preview">
+      <img id="thumb" src="" alt="thumb" />
+      <div class="info">
+        <div class="title" id="vid-title">—</div>
+        <div class="meta"  id="vid-meta">—</div>
+      </div>
+      <button class="btn-download" onclick="startDownload()" id="btn-dl">⬇ Baixar</button>
+    </div>
+
+    <!-- Progress -->
+    <div id="progress-area">
+      <div class="status-msg" id="status-msg">Iniciando…</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="progress-meta">
+        <span id="progress-pct">0%</span>
+        <span id="progress-eta"></span>
+        <span id="progress-speed"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Downloads list -->
+  <div class="card">
+    <h2>Arquivos baixados <button class="btn-info" style="float:right;padding:6px 12px;font-size:11px;" onclick="loadFiles()">↻ Atualizar</button></h2>
+    <ul class="file-list" id="file-list">
+      <li class="empty-msg">Nenhum arquivo ainda.</li>
+    </ul>
+  </div>
+</main>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+  let selectedFmt = 'best';
+  let currentInfo = null;
+  let pollTimer = null;
+
+  function selectFmt(btn) {
+    document.querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedFmt = btn.dataset.fmt;
+  }
+
+  function toast(msg, type = '') {
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.textContent = msg;
+    document.getElementById('toasts').appendChild(el);
+    setTimeout(() => el.remove(), 4000);
+  }
+
+  function fmtDuration(secs) {
+    if (!secs) return '';
+    const m = Math.floor(secs / 60), s = secs % 60;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  function fmtSize(bytes) {
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function fileIcon(name) {
+    if (/\.mp3$/i.test(name)) return '🎵';
+    if (/\.(mp4|webm|mkv)$/i.test(name)) return '🎬';
+    return '📄';
+  }
+
+  async function fetchInfo() {
+    const url = document.getElementById('url-input').value.trim();
+    if (!url) { toast('Cole um link primeiro!', 'error'); return; }
+
+    const btn = document.getElementById('btn-info');
+    btn.disabled = true;
+    btn.textContent = 'Buscando…';
+    document.getElementById('preview').classList.remove('visible');
+    document.getElementById('progress-area').style.display = 'none';
+
+    try {
+      const res = await fetch('/api/info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      currentInfo = data;
+      document.getElementById('thumb').src = data.thumbnail || '';
+      document.getElementById('vid-title').textContent = data.title;
+      document.getElementById('vid-meta').textContent =
+        [data.uploader, data.platform, fmtDuration(data.duration)].filter(Boolean).join(' · ');
+
+      document.getElementById('preview').classList.add('visible');
+    } catch (e) {
+      toast('Erro: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Buscar';
+    }
+  }
+
+  async function startDownload() {
+    const url = document.getElementById('url-input').value.trim();
+    if (!url) return;
+
+    document.getElementById('btn-dl').disabled = true;
+    document.getElementById('progress-area').style.display = 'block';
+    setProgress(0, 'Iniciando download…', '', '');
+
+    try {
+      const res = await fetch('/api/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, format: selectedFmt })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      pollJob(data.job_id);
+    } catch (e) {
+      toast('Erro: ' + e.message, 'error');
+      document.getElementById('btn-dl').disabled = false;
+    }
+  }
+
+  function setProgress(pct, msg, speed, eta) {
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-pct').textContent = pct + '%';
+    document.getElementById('status-msg').textContent = msg;
+    document.getElementById('progress-speed').textContent = speed;
+    document.getElementById('progress-eta').textContent = eta ? 'ETA: ' + eta : '';
+  }
+
+  async function pollJob(jobId) {
+    clearTimeout(pollTimer);
+    try {
+      const res = await fetch('/api/status/' + jobId);
+      const job = await res.json();
+
+      const statusLabels = {
+        starting:    'Iniciando…',
+        downloading: 'Baixando…',
+        processing:  'Processando…',
+        done:        'Concluído!',
+        error:       'Erro'
+      };
+
+      setProgress(job.progress, statusLabels[job.status] || job.status, job.speed, job.eta);
+
+      if (job.status === 'done') {
+        toast('Download concluído: ' + (job.filename || ''), 'success');
+        document.getElementById('btn-dl').disabled = false;
+        loadFiles();
+        return;
+      }
+      if (job.status === 'error') {
+        toast('Erro: ' + job.error, 'error');
+        document.getElementById('btn-dl').disabled = false;
+        return;
+      }
+    } catch {}
+    pollTimer = setTimeout(() => pollJob(jobId), 800);
+  }
+
+  async function loadFiles() {
+    const res = await fetch('/api/downloads');
+    const files = await res.json();
+    const list = document.getElementById('file-list');
+    if (!files.length) {
+      list.innerHTML = '<li class="empty-msg">Nenhum arquivo ainda.</li>';
+      return;
+    }
+    list.innerHTML = files.map(f => `
+      <li class="file-item">
+        <span class="file-icon">${fileIcon(f.name)}</span>
+        <span class="file-name">${f.name}</span>
+        <span class="file-size">${fmtSize(f.size)}</span>
+      </li>
+    `).join('');
+  }
+
+  // Enter key on input
+  document.getElementById('url-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') fetchInfo();
+  });
+
+  // Load files on start
+  loadFiles();
+</script>
+</body>
+</html>
