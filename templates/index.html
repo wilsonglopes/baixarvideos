@@ -205,6 +205,18 @@
 
     .empty-msg { text-align: center; color: #555; font-size: 14px; padding: 20px; }
 
+    .btn-dl-file {
+      padding: 6px 12px;
+      background: #6c63ff;
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .btn-dl-file:hover { background: #7c73ff; }
+
     .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; }
 
     .toast {
@@ -413,8 +425,14 @@
       setProgress(job.progress, statusLabels[job.status] || job.status, job.speed, job.eta);
 
       if (job.status === 'done') {
-        toast('Download concluído: ' + (job.filename || ''), 'success');
+        toast('Download concluído! Salvando no seu computador…', 'success');
         document.getElementById('btn-dl').disabled = false;
+        if (job.filename) {
+          const a = document.createElement('a');
+          a.href = '/api/download-file/' + encodeURIComponent(job.filename);
+          a.download = job.filename;
+          a.click();
+        }
         loadFiles();
         return;
       }
@@ -440,6 +458,7 @@
         <span class="file-icon">${fileIcon(f.name)}</span>
         <span class="file-name">${f.name}</span>
         <span class="file-size">${fmtSize(f.size)}</span>
+        <a href="/api/download-file/${encodeURIComponent(f.name)}" download="${f.name}" class="btn-dl-file">⬇</a>
       </li>
     `).join('');
   }

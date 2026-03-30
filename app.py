@@ -161,6 +161,12 @@ def list_downloads():
     return jsonify(files)
 
 
+@app.route("/api/download-file/<path:filename>")
+def download_file(filename):
+    from flask import send_from_directory
+    return send_from_directory(DOWNLOAD_DIR.resolve(), filename, as_attachment=True)
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     print("=" * 50)
