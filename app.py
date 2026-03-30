@@ -31,6 +31,8 @@ def _find_ffmpeg() -> str:
 FFMPEG_DIR = _find_ffmpeg()
 FFMPEG_AVAILABLE = bool(FFMPEG_DIR)
 
+COOKIES_FILE = Path("cookies.txt")
+
 
 def get_ydl_opts(job_id: str, output_format: str) -> dict:
     def progress_hook(d):
@@ -68,12 +70,14 @@ def get_ydl_opts(job_id: str, output_format: str) -> dict:
         "no_warnings": True,
         "postprocessors": [],
         "overwrites": True,
-        # Bypass YouTube bot detection on cloud servers
         "extractor_args": {"youtube": {"player_client": ["ios"]}},
         "http_headers": {
             "User-Agent": "com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X;)"
         },
     }
+
+    if COOKIES_FILE.exists():
+        opts["cookiefile"] = str(COOKIES_FILE)
 
     return opts
 
@@ -125,6 +129,8 @@ def get_info():
                 "User-Agent": "com.google.ios.youtube/19.29.1 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X;)"
             },
         }
+        if COOKIES_FILE.exists():
+            opts["cookiefile"] = str(COOKIES_FILE)
         with yt_dlp.YoutubeDL(opts) as ydl:
             info = ydl.extract_info(url, download=False)
         thumb = info.get("thumbnail", "")
@@ -172,6 +178,20 @@ def list_downloads():
                 "mtime": f.stat().st_mtime,
             })
     return jsonify(files)
+
+
+@app.route("/api/cookies", methods=["POST"])
+def save_cookies():
+    content = request.json.get("content", "").strip()
+    if not content:
+        return jsonify({"error": "Conteúdo vazio"}), 400
+    COOKIES_FILE.write_text(content, encoding="utf-8")
+    return jsonify({"ok": True})
+
+
+@app.route("/api/cookies", methods=["GET"])
+def cookies_status():
+    return jsonify({"exists": COOKIES_FILE.exists()})
 
 
 @app.route("/api/download-file/<path:filename>")
