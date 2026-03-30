@@ -245,10 +245,9 @@
   <div class="logo">⬇️</div>
   <div>
     <h1>Baixador de Vídeos</h1>
-    <p>YouTube, Instagram, Facebook e TikTok em um só lugar</p>
+    <p>Instagram, Facebook e TikTok em um só lugar</p>
   </div>
   <div class="badges">
-    <span class="badge yt">YouTube</span>
     <span class="badge ig">Instagram</span>
     <span class="badge fb">Facebook</span>
     <span class="badge tt">TikTok</span>
@@ -261,7 +260,7 @@
     <h2>Cole o link do vídeo</h2>
 
     <div class="input-row">
-      <input type="text" id="url-input" placeholder="https://www.youtube.com/watch?v=... ou Instagram / Facebook / TikTok" />
+      <input type="text" id="url-input" placeholder="https://www.instagram.com/p/... ou Facebook / TikTok" />
       <button class="btn-info" onclick="fetchInfo()" id="btn-info">Buscar</button>
     </div>
 
@@ -295,19 +294,6 @@
         <span id="progress-eta"></span>
         <span id="progress-speed"></span>
       </div>
-    </div>
-  </div>
-
-  <!-- Cookies -->
-  <div class="card" id="cookies-card">
-    <h2 style="cursor:pointer" onclick="toggleCookies()">🍪 Cookies do YouTube <span id="cookies-status" style="font-size:11px;color:#666;text-transform:none;font-weight:400;margin-left:8px;"></span> <span style="float:right;font-size:14px" id="cookies-arrow">▼</span></h2>
-    <div id="cookies-body" style="display:none;margin-top:16px;">
-      <p style="font-size:13px;color:#888;margin-bottom:12px;">
-        Cole aqui o conteúdo do seu <strong style="color:#aaa">cookies.txt</strong> do YouTube para evitar o erro de bot.<br>
-        Use a extensão <a href="https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc" target="_blank" style="color:#6c63ff">Get cookies.txt LOCALLY</a> no Chrome para exportar.
-      </p>
-      <textarea id="cookies-input" placeholder="# Netscape HTTP Cookie File&#10;.youtube.com	TRUE	/	TRUE	..." style="width:100%;height:120px;background:#0f0f1a;border:1px solid #3a3a5a;border-radius:10px;padding:12px;color:#ccc;font-size:12px;font-family:monospace;resize:vertical;outline:none;"></textarea>
-      <button class="btn-primary" style="margin-top:10px;width:100%" onclick="saveCookies()">💾 Salvar cookies</button>
     </div>
   </div>
 
@@ -483,49 +469,8 @@
     if (e.key === 'Enter') fetchInfo();
   });
 
-  // Cookies
-  function toggleCookies() {
-    const body = document.getElementById('cookies-body');
-    const arrow = document.getElementById('cookies-arrow');
-    const open = body.style.display === 'none';
-    body.style.display = open ? 'block' : 'none';
-    arrow.textContent = open ? '▲' : '▼';
-  }
-
-  async function saveCookies() {
-    const content = document.getElementById('cookies-input').value.trim();
-    if (!content) { toast('Cole o conteúdo do cookies.txt primeiro!', 'error'); return; }
-    const res = await fetch('/api/cookies', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content })
-    });
-    const data = await res.json();
-    if (data.ok) {
-      toast('Cookies salvos! YouTube deve funcionar agora.', 'success');
-      document.getElementById('cookies-status').textContent = '✅ Ativo';
-      document.getElementById('cookies-status').style.color = '#22c55e';
-    } else {
-      toast('Erro ao salvar cookies.', 'error');
-    }
-  }
-
-  async function checkCookies() {
-    const res = await fetch('/api/cookies');
-    const data = await res.json();
-    const el = document.getElementById('cookies-status');
-    if (data.exists) {
-      el.textContent = '✅ Ativo';
-      el.style.color = '#22c55e';
-    } else {
-      el.textContent = '⚠️ Não configurado';
-      el.style.color = '#f59e0b';
-    }
-  }
-
   // Load files on start
   loadFiles();
-  checkCookies();
 </script>
 </body>
 </html>
