@@ -162,9 +162,10 @@ def list_downloads():
 
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
     print("=" * 50)
     print("  Baixador de Videos - YouTube / Instagram / Facebook")
     print(f"  FFmpeg: {'OK' if FFMPEG_AVAILABLE else 'NAO ENCONTRADO (qualidade limitada)'}")
-    print("  Acesse: http://localhost:5000")
+    print(f"  Acesse: http://localhost:{port}")
     print("=" * 50)
-    app.run(debug=False, port=5000)
+    app.run(debug=False, host="0.0.0.0", port=port)
