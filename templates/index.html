@@ -44,6 +44,7 @@
     .badge.yt  { background: #ff0000; color: #fff; }
     .badge.ig  { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff; }
     .badge.fb  { background: #1877f2; color: #fff; }
+    .badge.tt  { background: #010101; color: #fff; border: 1px solid #333; }
 
     main { max-width: 820px; margin: 40px auto; padding: 0 20px; }
 
@@ -244,12 +245,13 @@
   <div class="logo">⬇️</div>
   <div>
     <h1>Baixador de Vídeos</h1>
-    <p>YouTube, Instagram e Facebook em um só lugar</p>
+    <p>YouTube, Instagram, Facebook e TikTok em um só lugar</p>
   </div>
   <div class="badges">
     <span class="badge yt">YouTube</span>
     <span class="badge ig">Instagram</span>
     <span class="badge fb">Facebook</span>
+    <span class="badge tt">TikTok</span>
   </div>
 </header>
 
@@ -259,7 +261,7 @@
     <h2>Cole o link do vídeo</h2>
 
     <div class="input-row">
-      <input type="text" id="url-input" placeholder="https://www.youtube.com/watch?v=... ou Instagram / Facebook" />
+      <input type="text" id="url-input" placeholder="https://www.youtube.com/watch?v=... ou Instagram / Facebook / TikTok" />
       <button class="btn-info" onclick="fetchInfo()" id="btn-info">Buscar</button>
     </div>
 
