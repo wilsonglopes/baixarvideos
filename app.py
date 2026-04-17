@@ -63,7 +63,7 @@ def get_ydl_opts(job_id: str, output_format: str) -> dict:
 
     opts = {
         "format": format_selector,
-        "outtmpl": str(DOWNLOAD_DIR / "%(title).50s.%(ext)s"),
+        "outtmpl": str(DOWNLOAD_DIR / "%(uploader).30s - %(id)s.%(ext)s"),
         "progress_hooks": [progress_hook],
         "quiet": True,
         "no_warnings": True,
